@@ -1,0 +1,15 @@
+{
+  "message_type": "access.create",
+  "correlation_id": "11111111-1111-1111-1111-111111111111",
+  "request_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+  "sent_at": "2026-02-28T12:00:00Z",
+  "employee": {
+    "id": "EMP0001",
+    "full_name": "Иванов Иван",
+    "department": "ИТ",
+    "position": "Разработчик"
+  },
+  "payload": {
+    "access_package": "DEV_STANDARD"
+  }
+}

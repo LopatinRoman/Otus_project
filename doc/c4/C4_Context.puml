@@ -1,0 +1,21 @@
+@startuml C4_Context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title HR Onboarding Hub (1С) — C4 Context (MVP)
+
+Person(hr, "HR-специалист", "Создаёт заявки на онбординг, контролирует этапы, повторяет отправку, отменяет заявки.")
+
+System_Boundary(s1, "Контур HR") {
+  System(system1, "HR Onboarding Hub (1С, БСП)", "Управляет заявками и этапами онбординга. Отправляет команды и принимает ответы через RMQ.")
+}
+
+System_Ext(itSystem, "ИТ-исполнитель (1С: Управление задачами)", "Получает команды по этапам, выполняет действия и отправляет ответы.")
+System_Ext(rmq, "RabbitMQ", "Очереди команд и ответов для обмена между системами.")
+
+Rel(hr, system1, "Работает через формы 1С", "UI")
+Rel(system1, rmq, "Публикует команды", "hr.onboarding.commands (JSON)")
+Rel(rmq, itSystem, "Доставляет команды", "commands")
+Rel(itSystem, rmq, "Публикует ответы", "hr.onboarding.replies (JSON)")
+Rel(rmq, system1, "Доставляет ответы", "replies")
+
+@enduml

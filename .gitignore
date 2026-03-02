@@ -1,4 +1,8 @@
 .env
+env.local.json
+**/env.local.json
+**/*.log
+**/temp/
 build/
 allure-report/
 

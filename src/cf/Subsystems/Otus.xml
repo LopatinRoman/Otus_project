@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MetaDataObject xmlns="http://v8.1c.ru/8.3/MDClasses" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:cmi="http://v8.1c.ru/8.2/managed-application/cmi" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xen="http://v8.1c.ru/8.3/xcf/enums" xmlns:xpr="http://v8.1c.ru/8.3/xcf/predef" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.20">
+	<Subsystem uuid="094267c9-5e57-45b8-80ea-e1d5a3046a8f">
+		<Properties>
+			<Name>Otus</Name>
+			<Synonym>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Otus</v8:content>
+				</v8:item>
+			</Synonym>
+			<Comment/>
+			<IncludeHelpInContents>true</IncludeHelpInContents>
+			<IncludeInCommandInterface>true</IncludeInCommandInterface>
+			<UseOneCommand>false</UseOneCommand>
+			<Explanation/>
+			<Picture/>
+			<Content>
+				<xr:Item xsi:type="xr:MDObjectRef">Catalog.otus_ПакетыДоступов</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Catalog.otus_Сотрудники</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Catalog.otus_ТипыЭтапов</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Catalog.otus_Оборудование</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Document.otus_ЗаявкаОнбординг</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Enum.otus_СтатусыОборудования</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Enum.otus_СтатусыЭтапаОнбординга</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Enum.otus_СтатусыЗаявкиОнбординга</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">InformationRegister.Otus_ЭтапыОнбординга</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Enum.otus_НаправлениеОбмена</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">InformationRegister.Otus_ЛогиОбменаRMQ</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Constant.RMQ_Хост</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Constant.RMQ_Порт</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Constant.RMQ_Пользователь</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Constant.RMQ_Пароль</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Constant.RMQ_VHost</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Constant.RMQ_ОчередьКоманд</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Constant.RMQ_ОчередьОтветов</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Constant.RMQ_ИнтервалОпросаСек</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Constant.RMQ_МаксСообщенийЗаЗапуск</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Constant.RMQ_ТаймаутЧтенияМС</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">Catalog.RMQ_Сообщения</xr:Item>
+			</Content>
+		</Properties>
+		<ChildObjects/>
+	</Subsystem>
+</MetaDataObject>

@@ -1,0 +1,24 @@
+@startuml C4_Container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title HR Onboarding Hub (1С) — C4 Container (MVP)
+
+Person(hr, "HR-специалист", "Создаёт заявки и контролирует выполнение.")
+
+System_Boundary(hrBoundary, "Контур HR") {
+  Container(hr1c, "HR Onboarding Hub (1С)", "1С:Предприятие + БСП", "Документ «ЗаявкаОнбординг», этапы, SLA, формы HR, обмен через RMQ.")
+}
+
+System_Boundary(itBoundary, "Контур ИТ") {
+  Container(it1c, "ИТ-исполнитель (1С: Управление задачами)", "1С:Предприятие (open source конфигурация)", "Принимает команды, выполняет действия, формирует ответы.")
+}
+
+Container(rmq, "RabbitMQ", "AMQP broker", "Очереди команд и ответов: hr.onboarding.commands / hr.onboarding.replies")
+
+Rel(hr, hr1c, "Работает", "UI 1С")
+Rel(hr1c, rmq, "Отправляет команды", "AMQP / JSON")
+Rel(rmq, it1c, "Передаёт команды", "AMQP / JSON")
+Rel(it1c, rmq, "Отправляет ответы", "AMQP / JSON")
+Rel(rmq, hr1c, "Передаёт ответы", "AMQP / JSON")
+
+@enduml

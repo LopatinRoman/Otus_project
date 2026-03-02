@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" xmlns:color="http://www.omg.org/spec/BPMN/non-normative/color/1.0" id="Definitions_HR_Onboarding_Hub" targetNamespace="http://example.local/bpmn/hr-onboarding-hub" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.12.0">
+  <bpmn:message id="Message_RMQ_Command" name="Команда этапа (RMQ)" />
+  <bpmn:message id="Message_RMQ_Reply" name="Ответ по этапу (RMQ)" />
+  <bpmn:collaboration id="Collaboration_Hub_IT">
+    <bpmn:participant id="Participant_Hub" name="HR Onboarding Hub (1С)" processRef="Process_Hub" />
+    <bpmn:participant id="Participant_IT" name="ИТ-исполнитель (1С: Управление задачами)" processRef="Process_IT" />
+    <bpmn:messageFlow id="MsgFlow_Command" name="Команда: access.create / asset.issue" sourceRef="Task_SendCommand" targetRef="Start_IT_Command" messageRef="Message_RMQ_Command" />
+    <bpmn:messageFlow id="MsgFlow_Reply" name="Ответ: success / error" sourceRef="Event_IT_SendReply" targetRef="Task_ReceiveReply" messageRef="Message_RMQ_Reply" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Hub" name="Онбординг сотрудника (MVP)" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Hub">
+      <bpmn:lane id="Lane_System" name="1С: Библиотека стандартных подсистем">
+        <bpmn:flowNodeRef>Task_GenerateStages</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_MoreStages</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SendCommand</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SelectNextStage</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CancelRequest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CompleteRequest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Canceled</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_MarkError</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_MarkDone</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ReceiveReply</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Boundary_SLA_Overdue</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Success</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_OverdueMarked</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_MarkOverdue</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_HR" name="HR">
+        <bpmn:flowNodeRef>Start_Hub</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CreateRequest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SubmitToWork</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_RetryStage</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CancelRequest_UI</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_RetryOrCancel</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_17bqkmf</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_1pbwbbv</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start_Hub" name="Получение HR подтверждения приема сотрудника на работу" />
+    <bpmn:userTask id="Task_CreateRequest" name="HR: создать заявку (Черновик)" />
+    <bpmn:serviceTask id="Task_GenerateStages" name="Система: сформировать этапы онбординга" />
+    <bpmn:exclusiveGateway id="Gateway_MoreStages" name="Остались этапы?" />
+    <bpmn:serviceTask id="Task_SendCommand" name="Система: отправить команду в RMQ">
+      <bpmn:incoming>Flow_9_error</bpmn:incoming>
+      <bpmn:outgoing>Flow_0nyjgqy</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_SelectNextStage" name="Система: выбрать следующий этап" />
+    <bpmn:serviceTask id="Task_CancelRequest" name="Система: заявка = Отменено" />
+    <bpmn:serviceTask id="Task_CompleteRequest" name="Система: заявка = Завершено">
+      <bpmn:outgoing>Flow_1mug634</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Task_SubmitToWork" name="HR: отправить в работу" />
+    <bpmn:userTask id="Task_RetryStage" name="HR: повторить отправку этапа" />
+    <bpmn:userTask id="Task_CancelRequest_UI" name="HR: отменить заявку" />
+    <bpmn:endEvent id="End_Canceled" name="Заявка отменена" />
+    <bpmn:exclusiveGateway id="Gateway_RetryOrCancel" name="HR Отменяет заявку?" />
+    <bpmn:serviceTask id="Task_MarkError" name="Система: этап = Ошибка, сохранить текст ошибки">
+      <bpmn:incoming>Flow_0nyjgqy</bpmn:incoming>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_MarkDone" name="Система: этап = Выполнено, сохранить результат" />
+    <bpmn:task id="Activity_17bqkmf" name="Уведомить сотрудника о готовности оборудования и доступов">
+      <bpmn:incoming>Flow_1mug634</bpmn:incoming>
+      <bpmn:outgoing>Flow_0p29ibe</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="Event_1pbwbbv" name="Доступы и оборудование предоставлены">
+      <bpmn:incoming>Flow_0p29ibe</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1" sourceRef="Start_Hub" targetRef="Task_CreateRequest" />
+    <bpmn:sequenceFlow id="Flow_2" sourceRef="Task_CreateRequest" targetRef="Task_SubmitToWork" />
+    <bpmn:sequenceFlow id="Flow_3" sourceRef="Task_SubmitToWork" targetRef="Task_GenerateStages" />
+    <bpmn:sequenceFlow id="Flow_4" sourceRef="Task_GenerateStages" targetRef="Gateway_MoreStages" />
+    <bpmn:sequenceFlow id="Flow_10" sourceRef="Task_MarkDone" targetRef="Gateway_MoreStages" />
+    <bpmn:sequenceFlow id="Flow_5_yes" name="Да" sourceRef="Gateway_MoreStages" targetRef="Task_SelectNextStage">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">да</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_5_no" name="Нет" sourceRef="Gateway_MoreStages" targetRef="Task_CompleteRequest">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">нет</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_6" sourceRef="Task_SelectNextStage" targetRef="Task_SendCommand" />
+    <bpmn:sequenceFlow id="Flow_13" sourceRef="Task_RetryStage" targetRef="Task_SendCommand" />
+    <bpmn:sequenceFlow id="Flow_9_error" name="Нет" sourceRef="Gateway_Success" targetRef="Task_SendCommand" />
+    <bpmn:sequenceFlow id="Flow_7" sourceRef="Task_SendCommand" targetRef="Task_ReceiveReply" />
+    <bpmn:sequenceFlow id="Flow_0nyjgqy" sourceRef="Task_SendCommand" targetRef="Task_MarkError" />
+    <bpmn:sequenceFlow id="Flow_8" sourceRef="Task_ReceiveReply" targetRef="Gateway_Success" />
+    <bpmn:sequenceFlow id="Flow_14" sourceRef="Task_CancelRequest_UI" targetRef="Task_CancelRequest" />
+    <bpmn:sequenceFlow id="Flow_15" sourceRef="Task_CancelRequest" targetRef="End_Canceled" />
+    <bpmn:sequenceFlow id="Flow_1mug634" sourceRef="Task_CompleteRequest" targetRef="Activity_17bqkmf" />
+    <bpmn:sequenceFlow id="Flow_12_retry" name="Нет" sourceRef="Gateway_RetryOrCancel" targetRef="Task_RetryStage">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">повторить</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_12_cancel" name="Да" sourceRef="Gateway_RetryOrCancel" targetRef="Task_CancelRequest_UI">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">отменить</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_11" sourceRef="Task_MarkError" targetRef="Gateway_RetryOrCancel" />
+    <bpmn:sequenceFlow id="Flow_9_success" name="Да" sourceRef="Gateway_Success" targetRef="Task_MarkDone" />
+    <bpmn:sequenceFlow id="Flow_0yyo135" sourceRef="Boundary_SLA_Overdue" targetRef="Task_MarkOverdue" />
+    <bpmn:sequenceFlow id="Flow_0x320tr" sourceRef="Task_MarkOverdue" targetRef="End_OverdueMarked" />
+    <bpmn:sequenceFlow id="Flow_0p29ibe" sourceRef="Activity_17bqkmf" targetRef="Event_1pbwbbv" />
+    <bpmn:receiveTask id="Task_ReceiveReply" name="Система: получить ответ из RMQ" messageRef="Message_RMQ_Reply" />
+    <bpmn:boundaryEvent id="Boundary_SLA_Overdue" name="Дедлайн SLA этапа" cancelActivity="false" attachedToRef="Task_ReceiveReply">
+      <bpmn:outgoing>Flow_0yyo135</bpmn:outgoing>
+      <bpmn:timerEventDefinition>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT5M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:exclusiveGateway id="Gateway_Success" name="Ответ успешен?">
+      <bpmn:incoming>Flow_8</bpmn:incoming>
+      <bpmn:outgoing>Flow_9_success</bpmn:outgoing>
+      <bpmn:outgoing>Flow_9_error</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:intermediateThrowEvent id="End_OverdueMarked" name="Просрочка отмечена">
+      <bpmn:incoming>Flow_0x320tr</bpmn:incoming>
+    </bpmn:intermediateThrowEvent>
+    <bpmn:serviceTask id="Task_MarkOverdue" name="Система: отметить этап как просроченный (SLA)">
+      <bpmn:incoming>Flow_0yyo135</bpmn:incoming>
+      <bpmn:outgoing>Flow_0x320tr</bpmn:outgoing>
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmn:process id="Process_IT" name="ИТ-исполнитель: обработка команды" isExecutable="false">
+    <bpmn:serviceTask id="Task_IT_DoAction" name="ИТ: выполнить действие (учётка/права/оборудование)" />
+    <bpmn:intermediateThrowEvent id="Event_IT_SendReply" name="Отправить ответ (RMQ)">
+      <bpmn:messageEventDefinition messageRef="Message_RMQ_Reply" />
+    </bpmn:intermediateThrowEvent>
+    <bpmn:sequenceFlow id="IT_Flow_1" sourceRef="Start_IT_Command" targetRef="Task_IT_DoAction" />
+    <bpmn:sequenceFlow id="IT_Flow_2" sourceRef="Task_IT_DoAction" targetRef="Event_IT_SendReply" />
+    <bpmn:startEvent id="Start_IT_Command" name="Команда этапа получена (RMQ)">
+      <bpmn:outgoing>IT_Flow_1</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0v0mdep" />
+    </bpmn:startEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Hub">
+    <bpmndi:BPMNPlane id="BPMNPlane_Hub" bpmnElement="Collaboration_Hub_IT">
+      <bpmndi:BPMNShape id="Shape_Participant_Hub" bpmnElement="Participant_Hub" isHorizontal="true">
+        <dc:Bounds x="140" y="80" width="4230" height="1020" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_System" bpmnElement="Lane_System" isHorizontal="true">
+        <dc:Bounds x="170" y="360" width="4200" height="740" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_HR" bpmnElement="Lane_HR" isHorizontal="true">
+        <dc:Bounds x="170" y="80" width="4200" height="280" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Start_Hub" bpmnElement="Start_Hub" bioc:stroke="#205022" bioc:fill="#c8e6c9" color:background-color="#c8e6c9" color:border-color="#205022">
+        <dc:Bounds x="210" y="240" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="188" y="276" width="82" height="66" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CreateRequest" bpmnElement="Task_CreateRequest">
+        <dc:Bounds x="280" y="220" width="220" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_GenerateStages" bpmnElement="Task_GenerateStages">
+        <dc:Bounds x="688" y="549" width="240" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_MoreStages" bpmnElement="Gateway_MoreStages" isMarkerVisible="true">
+        <dc:Bounds x="1025" y="564" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1065" y="606.5" width="50" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_SendCommand" bpmnElement="Task_SendCommand">
+        <dc:Bounds x="1450" y="549" width="220" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_SelectNextStage" bpmnElement="Task_SelectNextStage">
+        <dc:Bounds x="1170" y="549" width="220" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CancelRequest" bpmnElement="Task_CancelRequest">
+        <dc:Bounds x="3480" y="630" width="240" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CompleteRequest" bpmnElement="Task_CompleteRequest">
+        <dc:Bounds x="930" y="795" width="240" height="70" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_SubmitToWork" bpmnElement="Task_SubmitToWork">
+        <dc:Bounds x="698" y="218" width="220" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_RetryStage" bpmnElement="Task_RetryStage">
+        <dc:Bounds x="2120" y="230" width="240" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CancelRequest_UI" bpmnElement="Task_CancelRequest_UI">
+        <dc:Bounds x="3170" y="235" width="240" height="70" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_Canceled" bpmnElement="End_Canceled" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
+        <dc:Bounds x="3932" y="652" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3925" y="615" width="51" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_RetryOrCancel" bpmnElement="Gateway_RetryOrCancel" isMarkerVisible="true">
+        <dc:Bounds x="2885" y="245" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2875" y="221" width="70" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_MarkError" bpmnElement="Task_MarkError">
+        <dc:Bounds x="2780" y="625" width="260" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_MarkDone" bpmnElement="Task_MarkDone">
+        <dc:Bounds x="2380" y="540" width="260" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_17bqkmf_di" bpmnElement="Activity_17bqkmf">
+        <dc:Bounds x="1370" y="218" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1pbwbbv_di" bpmnElement="Event_1pbwbbv" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
+        <dc:Bounds x="1662" y="152" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1640" y="195" width="81" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_ReceiveReply" bpmnElement="Task_ReceiveReply">
+        <dc:Bounds x="1870" y="549" width="220" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_13738w9_di" bpmnElement="Gateway_Success" isMarkerVisible="true">
+        <dc:Bounds x="2215" y="555" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2267" y="543" width="82" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0e2zgtp_di" bpmnElement="End_OverdueMarked" bioc:stroke="#0d4372" bioc:fill="#bbdefb" color:background-color="#bbdefb" color:border-color="#0d4372">
+        <dc:Bounds x="2482" y="752" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2471" y="797.5" width="57" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_MarkOverdue" bpmnElement="Task_MarkOverdue">
+        <dc:Bounds x="1948" y="735" width="260" height="70" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Boundary_SLA_Overdue" bpmnElement="Boundary_SLA_Overdue">
+        <dc:Bounds x="2060" y="609" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2044" y="645" width="68" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_1" bpmnElement="Flow_1">
+        <di:waypoint x="246" y="258" />
+        <di:waypoint x="280" y="258" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_2" bpmnElement="Flow_2">
+        <di:waypoint x="500" y="257" />
+        <di:waypoint x="698" y="257" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_3" bpmnElement="Flow_3">
+        <di:waypoint x="808" y="298" />
+        <di:waypoint x="808" y="549" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_4" bpmnElement="Flow_4">
+        <di:waypoint x="928" y="589" />
+        <di:waypoint x="1025" y="589" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_10" bpmnElement="Flow_10">
+        <di:waypoint x="2510" y="540" />
+        <di:waypoint x="2510" y="480" />
+        <di:waypoint x="1050" y="480" />
+        <di:waypoint x="1050" y="564" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_5_yes" bpmnElement="Flow_5_yes">
+        <di:waypoint x="1075" y="589" />
+        <di:waypoint x="1170" y="589" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1116" y="571" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_5_no" bpmnElement="Flow_5_no">
+        <di:waypoint x="1050" y="614" />
+        <di:waypoint x="1050" y="795" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1055" y="702" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_6" bpmnElement="Flow_6">
+        <di:waypoint x="1390" y="589" />
+        <di:waypoint x="1450" y="589" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_13" bpmnElement="Flow_13">
+        <di:waypoint x="2120" y="270" />
+        <di:waypoint x="1550" y="270" />
+        <di:waypoint x="1550" y="549" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_9_error" bpmnElement="Flow_9_error">
+        <di:waypoint x="2240" y="555" />
+        <di:waypoint x="2240" y="520" />
+        <di:waypoint x="1610" y="520" />
+        <di:waypoint x="1610" y="549" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2210" y="541" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_7" bpmnElement="Flow_7">
+        <di:waypoint x="1670" y="589" />
+        <di:waypoint x="1870" y="589" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0nyjgqy_di" bpmnElement="Flow_0nyjgqy">
+        <di:waypoint x="1610" y="629" />
+        <di:waypoint x="1610" y="850" />
+        <di:waypoint x="2910" y="850" />
+        <di:waypoint x="2910" y="705" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_8" bpmnElement="Flow_8">
+        <di:waypoint x="2090" y="582" />
+        <di:waypoint x="2217" y="582" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_14" bpmnElement="Flow_14">
+        <di:waypoint x="3410" y="270" />
+        <di:waypoint x="3600" y="270" />
+        <di:waypoint x="3600" y="630" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_15" bpmnElement="Flow_15">
+        <di:waypoint x="3720" y="670" />
+        <di:waypoint x="3932" y="670" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1mug634_di" bpmnElement="Flow_1mug634">
+        <di:waypoint x="1170" y="830" />
+        <di:waypoint x="1420" y="830" />
+        <di:waypoint x="1420" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_12_retry" bpmnElement="Flow_12_retry">
+        <di:waypoint x="2885" y="270" />
+        <di:waypoint x="2360" y="270" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2613" y="252" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_12_cancel" bpmnElement="Flow_12_cancel">
+        <di:waypoint x="2935" y="270" />
+        <di:waypoint x="3170" y="270" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3046" y="252" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_11" bpmnElement="Flow_11">
+        <di:waypoint x="2910" y="625" />
+        <di:waypoint x="2910" y="295" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_9_success" bpmnElement="Flow_9_success">
+        <di:waypoint x="2265" y="580" />
+        <di:waypoint x="2380" y="580" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2306" y="588" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0yyo135_di" bpmnElement="Flow_0yyo135">
+        <di:waypoint x="2078" y="645" />
+        <di:waypoint x="2078" y="735" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0x320tr_di" bpmnElement="Flow_0x320tr">
+        <di:waypoint x="2208" y="770" />
+        <di:waypoint x="2482" y="770" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0p29ibe_di" bpmnElement="Flow_0p29ibe">
+        <di:waypoint x="1420" y="218" />
+        <di:waypoint x="1420" y="170" />
+        <di:waypoint x="1662" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Participant_IT" bpmnElement="Participant_IT" isHorizontal="true">
+        <dc:Bounds x="140" y="1200" width="4230" height="170" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_IT_DoAction" bpmnElement="Task_IT_DoAction">
+        <dc:Bounds x="300" y="1245" width="360" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Event_IT_SendReply" bpmnElement="Event_IT_SendReply" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
+        <dc:Bounds x="742" y="1265" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="718" y="1301" width="85" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_045oe6c_di" bpmnElement="Start_IT_Command" bioc:stroke="#205022" bioc:fill="#c8e6c9" color:background-color="#c8e6c9" color:border-color="#205022">
+        <dc:Bounds x="220" y="1265" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="197" y="1301" width="83" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_IT_Flow_1" bpmnElement="IT_Flow_1">
+        <di:waypoint x="256" y="1283" />
+        <di:waypoint x="300" y="1283" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_IT_Flow_2" bpmnElement="IT_Flow_2">
+        <di:waypoint x="660" y="1283" />
+        <di:waypoint x="742" y="1283" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MsgFlow_Command" bpmnElement="MsgFlow_Command">
+        <di:waypoint x="1550" y="629" />
+        <di:waypoint x="1550" y="950" />
+        <di:waypoint x="238" y="950" />
+        <di:waypoint x="238" y="1265" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1516" y="770" width="76" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MsgFlow_Reply" bpmnElement="MsgFlow_Reply">
+        <di:waypoint x="760" y="1265" />
+        <di:waypoint x="760" y="1040" />
+        <di:waypoint x="1900" y="1040" />
+        <di:waypoint x="1900" y="630" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1304" y="1016" width="87" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

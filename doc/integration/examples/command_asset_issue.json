@@ -1,0 +1,16 @@
+{
+  "message_type": "asset.issue",
+  "correlation_id": "22222222-2222-2222-2222-222222222222",
+  "request_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+  "sent_at": "2026-02-28T12:01:00Z",
+  "employee": {
+    "id": "EMP0001",
+    "full_name": "Иванов Иван",
+    "department": "ИТ",
+    "position": "Разработчик"
+  },
+  "payload": {
+    "asset_type": "Ноутбук",
+    "asset_tag": null
+  }
+}

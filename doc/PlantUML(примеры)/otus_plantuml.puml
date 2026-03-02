@@ -1,0 +1,143 @@
+' =========================================================
+' C4-PlantUML схемы интеграции: 1C ERP ↔ Шина ↔ 1C WMS, B2B → ERP
+' =========================================================
+
+' -------------------------
+' 1) Контекст (C4)
+' -------------------------
+@startuml C4_Context_1C_ERP_WMS_B2B_RU
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+' !include C4_Context.puml
+
+LAYOUT_TOP_DOWN()
+LAYOUT_WITH_LEGEND()
+
+title 1C ERP / 1C WMS / Шина данных / B2B
+
+Person(partnerUser, "Партнёр (поставщик)", "Создаёт заказы поставщика через внешнюю систему")
+
+System_Ext(b2b, "Внешняя B2B-система", "Портал/EDI/интеграция партнёров")
+System(erp, "1C ERP", "Учёт, справочники, документы закупок (заказы поставщика)")
+System(wms, "1C WMS", "Складское управление и справочники склада")
+
+System_Ext(bus, "Шина данных", "Доставка сообщений между системами и контроль ошибок")
+System_Ext(auth, "Служба аутентификации", "Проверка доступа (токены/ключи)")
+
+Rel(partnerUser, b2b, "Создаёт и отправляет заказ поставщика", "Веб-интерфейс / EDI")
+Rel(b2b, auth, "Проверка доступа", "OAuth 2.0 / API key / JWT")
+Rel(b2b, erp, "Создание заказа поставщика", "HTTPS/REST (JSON)")
+
+Rel(erp, bus, "Передача номенклатуры", "Сообщения (JSON/XML)")
+Rel(bus, wms, "Доставка номенклатуры", "Очередь/тема сообщений")
+
+Rel_Back(wms, bus, "Сообщения о результате обработки", "Сообщения")
+Rel_Back(bus, erp, "Доставка результата обработки", "Сообщения")
+
+@enduml
+
+
+' -------------------------
+' 2) Контейнеры (C4)
+' -------------------------
+@startuml C4_Container_1C_ERP_WMS_B2B_RU
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+' !include C4_Container.puml
+
+LAYOUT_TOP_DOWN()
+LAYOUT_WITH_LEGEND()
+
+title Контейнеры — HTTP вход в ERP + передача номенклатуры через шину данных
+
+System_Ext(b2b, "Внешняя B2B-система", "Система партнёров")
+System_Ext(auth, "Служба аутентификации", "Проверка доступа (токены/ключи)")
+
+System_Boundary(erpBoundary, "1C ERP") {
+  Container(erpHttp, "HTTP-сервис 1C ERP", "1C:Enterprise HTTP Service", "Принимает запрос на создание заказа поставщика")
+  Container(erpLogic, "Обработка заказа поставщика", "1C", "Проверка данных и создание документа")
+  ContainerDb(erpDb, "База данных 1C ERP", "DB", "Справочники, документы, регистры")
+
+  Container(erpMsgJournal, "Журнал исходящих сообщений", "1C таблицы", "Хранит сообщения для передачи в шину данных")
+  Container(erpSender, "Отправка сообщений в шину данных", "Задание 1C / служба", "Берёт сообщения из журнала и отправляет их")
+  Container(erpResultReceiver, "Приём результатов обработки", "Задание 1C / служба", "Принимает сообщения о результате обработки")
+}
+
+System_Boundary(busBoundary, "Шина данных") {
+  Container(broker, "Сервис доставки сообщений", "Kafka/RabbitMQ/ESB", "Принимает и доставляет сообщения между системами")
+  Container(problemQueue, "Очередь проблемных сообщений", "Очередь/тема", "Сообщения, требующие разбирательства")
+  Container(observ, "Сбор журналов и показателей", "ELK/Prometheus/Grafana", "Журналы, показатели, уведомления")
+}
+
+System_Boundary(wmsBoundary, "1C WMS") {
+  Container(wmsReceiver, "Приём номенклатуры", "1C", "Принимает и обрабатывает сообщения о номенклатуре")
+  ContainerDb(wmsDb, "База данных 1C WMS", "DB", "Справочники WMS и складские данные")
+}
+
+Rel(b2b, auth, "Проверка доступа", "OAuth 2.0 / API key / JWT")
+Rel(b2b, erpHttp, "Создать заказ поставщика (POST)", "HTTPS/JSON")
+Rel(erpHttp, erpLogic, "Передать запрос на обработку", "Внутри 1C")
+Rel(erpLogic, erpDb, "Записать заказ поставщика", "Транзакция")
+Rel(erpLogic, erpMsgJournal, "Записать сообщение о номенклатуре", "В одной операции записи")
+
+Rel(erpMsgJournal, erpSender, "Получить сообщения для отправки", "Периодическая проверка")
+Rel(erpSender, broker, "Отправить сообщение о номенклатуре", "Сообщения")
+
+Rel(broker, wmsReceiver, "Доставить сообщение о номенклатуре", "Сообщения")
+Rel(wmsReceiver, wmsDb, "Создать или обновить номенклатуру", "Транзакция")
+
+Rel(wmsReceiver, broker, "Отправить результат обработки", "Сообщения")
+Rel(broker, erpResultReceiver, "Доставить результат обработки", "Сообщения")
+Rel(erpResultReceiver, erpDb, "Записать результат обработки", "DB")
+
+Rel(broker, problemQueue, "Переместить сообщение при ошибках доставки/обработки", "Автоматически")
+Rel(observ, broker, "Сбор показателей и журналов", "Журналы/показатели")
+
+@enduml
+
+
+' -------------------------
+' 3) Динамика (C4) — шаги процесса
+' -------------------------
+@startuml C4_Dynamic_1C_ERP_WMS_B2B_RU
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Dynamic.puml
+' !include C4_Dynamic.puml
+
+LAYOUT_TOP_DOWN()
+LAYOUT_WITH_LEGEND()
+
+title Создание заказа поставщика и передача номенклатуры
+
+Container(b2b, "Внешняя B2B-система", "External", "Система партнёров")
+
+System_Boundary(erpBoundary, "1C ERP") {
+  Container(erpHttp, "HTTP-сервис 1C ERP", "1C HTTP", "Принимает запрос на создание заказа поставщика")
+  Container(erpLogic, "Обработка заказа поставщика", "1C", "Проверка данных и создание документа")
+  ContainerDb(erpDb, "База данных 1C ERP", "DB", "Документы и справочники")
+  Container(erpMsgJournal, "Журнал исходящих сообщений", "1C таблицы", "Сообщения для передачи в шину данных")
+  Container(erpSender, "Отправка сообщений в шину данных", "Задание 1C / служба", "Отправляет сообщения из журнала")
+}
+
+System_Boundary(busBoundary, "Шина данных") {
+  Container(broker, "Сервис доставки сообщений", "Kafka/RabbitMQ/ESB", "Доставка сообщений между системами")
+  Container(problemQueue, "Очередь проблемных сообщений", "Очередь/тема", "Сообщения для разбирательства")
+}
+
+System_Boundary(wmsBoundary, "1C WMS") {
+  Container(wmsReceiver, "Приём номенклатуры", "1C", "Обработка сообщений о номенклатуре")
+  ContainerDb(wmsDb, "База данных 1C WMS", "DB", "Справочники WMS")
+}
+
+Rel_D(b2b, erpHttp, "1) Отправить запрос на создание заказа поставщика", "HTTPS/JSON")
+Rel_D(erpHttp, erpLogic, "2) Передать запрос на обработку", "Внутри 1C")
+Rel_R(erpLogic, erpDb, "3) Записать заказ поставщика", "Транзакция")
+Rel_R(erpLogic, erpMsgJournal, "4) Записать сообщение о номенклатуре", "В одной операции записи")
+
+Rel_D(erpMsgJournal, erpSender, "5) Получить сообщения для отправки", "Периодическая проверка")
+Rel_D(erpSender, broker, "6) Отправить сообщение о номенклатуре", "Сообщения")
+
+Rel_D(broker, wmsReceiver, "7) Доставить сообщение о номенклатуре", "Сообщения")
+Rel_R(wmsReceiver, wmsDb, "8) Создать или обновить номенклатуру", "Транзакция")
+
+Rel_D(broker, problemQueue, "9) Переместить сообщение при ошибках", "Автоматически")
+
+SHOW_LEGEND()
+@enduml

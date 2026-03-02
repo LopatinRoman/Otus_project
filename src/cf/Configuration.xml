@@ -298,6 +298,7 @@
 			<Subsystem>ПодключаемыеОтчетыИОбработки</Subsystem>
 			<Subsystem>СтандартныеПодсистемы</Subsystem>
 			<Subsystem>ТехнологияСервиса</Subsystem>
+			<Subsystem>Otus</Subsystem>
 			<StyleItem>АктуальнаяПодпискаЦвет</StyleItem>
 			<StyleItem>ВажнаяНадписьШрифт</StyleItem>
 			<StyleItem>ВидДняПроизводственногоКалендаряВоскресеньеЦвет</StyleItem>
@@ -1277,6 +1278,7 @@
 			<CommonTemplate>СоответствиеТэговОбщимФормам</CommonTemplate>
 			<CommonTemplate>СтруктураПодчиненности</CommonTemplate>
 			<CommonTemplate>ШтампЭлектроннойПодписиOfficeOpen</CommonTemplate>
+			<CommonTemplate>RMQ</CommonTemplate>
 			<FilterCriterion>СвязанныеДокументы</FilterCriterion>
 			<CommonModule>_ДемоЗаметки</CommonModule>
 			<CommonModule>_ДемоЛокализация</CommonModule>
@@ -2079,6 +2081,8 @@
 			<CommonModule>ЭлектроннаяПодписьСлужебныйПовтИсп</CommonModule>
 			<CommonModule>ЭлектроннаяПодписьСлужебныйРФ</CommonModule>
 			<CommonModule>ЯндексПереводчик</CommonModule>
+			<CommonModule>Онбординг_RMQ</CommonModule>
+			<CommonModule>otus_РегламентныеЗадания</CommonModule>
 			<CommonAttribute>КомментарийЯзык1</CommonAttribute>
 			<CommonAttribute>КомментарийЯзык2</CommonAttribute>
 			<CommonAttribute>НаименованиеЯзык1</CommonAttribute>
@@ -2391,6 +2395,7 @@
 			<ScheduledJob>УстановкаПорядкаОтложенногоОбновленияВМоделиСервиса</ScheduledJob>
 			<ScheduledJob>ЧтениеНовостейСлужбыПоддержки</ScheduledJob>
 			<ScheduledJob>ЭкспортОценкиПроизводительности</ScheduledJob>
+			<ScheduledJob>otus_ПолучитьСообщенияRMQ</ScheduledJob>
 			<SettingsStorage>ХранилищеВариантовОтчетов</SettingsStorage>
 			<FunctionalOption>_ДемоИспользоватьАнкетированиеБСП</FunctionalOption>
 			<FunctionalOption>_ДемоИспользоватьБизнесПроцессыИЗадачиБСП</FunctionalOption>
@@ -2929,6 +2934,16 @@
 			<Constant>ЭтоАвтономноеРабочееМесто</Constant>
 			<Constant>УдалитьЛогинДоступаКСервисуMorpher</Constant>
 			<Constant>УдалитьНастройкиВходаПользователей</Constant>
+			<Constant>RMQ_Хост</Constant>
+			<Constant>RMQ_Порт</Constant>
+			<Constant>RMQ_Пользователь</Constant>
+			<Constant>RMQ_Пароль</Constant>
+			<Constant>RMQ_VHost</Constant>
+			<Constant>RMQ_ОчередьКоманд</Constant>
+			<Constant>RMQ_ОчередьОтветов</Constant>
+			<Constant>RMQ_ИнтервалОпросаСек</Constant>
+			<Constant>RMQ_МаксСообщенийЗаЗапуск</Constant>
+			<Constant>RMQ_ТаймаутЧтенияМС</Constant>
 			<CommonForm>_ДемоМоиНастройки</CommonForm>
 			<CommonForm>_ДемоПримечание</CommonForm>
 			<CommonForm>_ДемоФормаВыбораДополнительныхУсловий</CommonForm>
@@ -3164,6 +3179,11 @@
 			<Catalog>ЯзыкиПечатныхФорм</Catalog>
 			<Catalog>Удалить_ДемоОбщиеСведения</Catalog>
 			<Catalog>УдалитьОчередьЗаданий</Catalog>
+			<Catalog>otus_Сотрудники</Catalog>
+			<Catalog>otus_ПакетыДоступов</Catalog>
+			<Catalog>otus_ТипыЭтапов</Catalog>
+			<Catalog>otus_Оборудование</Catalog>
+			<Catalog>RMQ_Сообщения</Catalog>
 			<Document>_ДемоЗаказПокупателя</Document>
 			<Document>_ДемоКорректировкаОстатковТоваровВМестахХранения</Document>
 			<Document>_ДемоНачислениеЗарплаты</Document>
@@ -3189,6 +3209,7 @@
 			<Document>ТелефонныйЗвонок</Document>
 			<Document>ЭлектронноеПисьмоВходящее</Document>
 			<Document>ЭлектронноеПисьмоИсходящее</Document>
+			<Document>otus_ЗаявкаОнбординг</Document>
 			<Sequence>_ДемоДвижениеТоваров</Sequence>
 			<DocumentJournal>_ДемоЖурналВсехДокументов</DocumentJournal>
 			<DocumentJournal>_ДемоСкладскиеДокументы</DocumentJournal>
@@ -3317,6 +3338,10 @@
 			<Enum>ЦветаЗаметок</Enum>
 			<Enum>ЦветаСвойств</Enum>
 			<Enum>ЦветностиИзображения</Enum>
+			<Enum>otus_СтатусыЗаявкиОнбординга</Enum>
+			<Enum>otus_СтатусыЭтапаОнбординга</Enum>
+			<Enum>otus_СтатусыОборудования</Enum>
+			<Enum>otus_НаправлениеОбмена</Enum>
 			<Report>_ДемоДинамикаИзмененийФайлов</Report>
 			<Report>_ДемоОборотноСальдоваяВедомость</Report>
 			<Report>_ДемоОтчетПоСчетамНаОплатуГлобальный</Report>
@@ -3781,6 +3806,8 @@
 			<InformationRegister>УдалитьСводныеПриложенияПорядокВыгрузкиОбъектов</InformationRegister>
 			<InformationRegister>УдалитьСводныеПриложенияСостояниеВыгрузки</InformationRegister>
 			<InformationRegister>УдалитьХранимыеФайлыВерсий</InformationRegister>
+			<InformationRegister>Otus_ЭтапыОнбординга</InformationRegister>
+			<InformationRegister>Otus_ЛогиОбменаRMQ</InformationRegister>
 			<AccumulationRegister>_ДемоОборотыПоСчетамНаОплату</AccumulationRegister>
 			<AccumulationRegister>_ДемоОстаткиТоваровВМестахХранения</AccumulationRegister>
 			<ChartOfCharacteristicTypes>_ДемоВидыСубконто</ChartOfCharacteristicTypes>

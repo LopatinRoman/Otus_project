@@ -1,0 +1,12 @@
+{
+  "message_type": "asset.issued",
+  "correlation_id": "22222222-2222-2222-2222-222222222222",
+  "request_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+  "received_at": "2026-02-28T12:01:10Z",
+  "status": "error",
+  "result": null,
+  "error": {
+    "code": "ASSET_NOT_AVAILABLE",
+    "message": "Нет свободного оборудования указанного типа"
+  }
+}
