@@ -19,7 +19,7 @@ MVP-система управления **онбордингом/оффборд�
 - **C4 (архитектура)**:
   - Картинки: `doc/c4/C4_Context.png`, `doc/c4/C4_Container.png`
   - Исходники: `doc/c4/*.puml`
-- **ER (модель данных)**: `doc/er/ER.png` (или `doc/er/ER.pdf`)
+- **ER (модель данных)**: `doc/er/ER.png` (или `doc/er/ER.png`)
 - **UI (прототипы форм)**: `doc/ui/UI_Prototype.png` (или 2 файла по формам)
 - **Интеграция RabbitMQ (контракт)**: `doc/integration/rmq.md`  
   Примеры JSON: `doc/integration/examples/`
