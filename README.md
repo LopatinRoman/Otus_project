@@ -24,10 +24,10 @@ MVP-система управления **онбордингом/оффборд�
 - **Интеграция RabbitMQ (контракт)**: `doc/integration/rmq.md`  
   Примеры JSON: `doc/integration/examples/`
 - **Тесты**:
-  - Yaxunit: `tests/yaxunit/`
-  - Vanessa Automation: `tests/vanessa/`
-  - План тестирования (docx): `tests/vanessa/VA_TestPlan.docx`
-- **Презентация защиты**: `presentation/HR_Onboarding_Hub_MVP.pptx` (или PDF)
+  - Yaxunit: `src/cfe/`
+  - Vanessa Automation: `features/`
+  - План тестирования (md): `doc/СценарийТестирования.md`
+- **Презентация защиты**: `presentation/`
 
 ---
 
