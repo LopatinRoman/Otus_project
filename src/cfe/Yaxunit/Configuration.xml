@@ -214,6 +214,7 @@
 			<CommonModule>ЮТЧитательСлужебныйВызовСервера</CommonModule>
 			<CommonModule>ЮТЧитательСлужебныйКлиент</CommonModule>
 			<CommonModule>Док_otus_ЗаявкаОнбординг</CommonModule>
+			<CommonModule>ОМ_Онбординг_RMQ</CommonModule>
 			<DataProcessor>ЮТHTTPServiceRequest</DataProcessor>
 			<DataProcessor>ЮТHTTPОтвет</DataProcessor>
 			<DataProcessor>ЮТHTTPСервисЗапрос</DataProcessor>
