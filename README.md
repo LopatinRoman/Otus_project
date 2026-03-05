@@ -19,15 +19,15 @@ MVP-система управления **онбордингом/оффборд�
 - **C4 (архитектура)**:
   - Картинки: `doc/c4/C4_Context.png`, `doc/c4/C4_Container.png`
   - Исходники: `doc/c4/*.puml`
-- **ER (модель данных)**: `doc/er/ER.png` (или `doc/er/ER.pdf`)
-- **UI (прототипы форм)**: `doc/ui/UI_Prototype.png` (или 2 файла по формам)
+- **ER (модель данных)**: `doc/er/ER.png` (или `doc/er/ER.png`)
+- **UI (прототипы форм)**: `doc/ui/` (2 файла по формам)
 - **Интеграция RabbitMQ (контракт)**: `doc/integration/rmq.md`  
   Примеры JSON: `doc/integration/examples/`
 - **Тесты**:
-  - Yaxunit: `tests/yaxunit/`
-  - Vanessa Automation: `tests/vanessa/`
-  - План тестирования (docx): `tests/vanessa/VA_TestPlan.docx`
-- **Презентация защиты**: `presentation/HR_Onboarding_Hub_MVP.pptx` (или PDF)
+  - Yaxunit: `src/cfe/`
+  - Vanessa Automation: `features/`
+  - План тестирования (md): `doc/СценарийТестирования.md`
+- **Презентация защиты**: `presentation/`
 
 ---
 
@@ -52,9 +52,9 @@ MVP-система управления **онбордингом/оффборд�
 
 Ключевые каталоги:
 - `src/` — исходники/конфигурация (БСП/демо база/расширение)
+- `src/cfe` — Расширение YaxUnit
 - `doc/` — артефакты сдачи (BPMN/C4/ER/UI/Integration/Architecture decisions)
-- `tests/` — тесты (Yaxunit + Vanessa)
-- `features/` — сценарии (если используются в вашем bootstrap)
+- `features/` — тесты
 - `presentation/` — презентация защиты
 - `.gitlab-ci.yml` — CI: проверка структуры + публикация артефактов + уведомление YouTrack
 
@@ -75,9 +75,9 @@ MVP-система управления **онбордингом/оффборд�
 
 ## Тестирование
 
-- Юнит-тесты: `tests/yaxunit/`
-- Сценарный тест: `tests/vanessa/`
-- План сценарного тестирования: `tests/vanessa/VA_TestPlan.docx`
+- Юнит-тесты: `src/cfe`
+- Сценарный тест: `features/`
+- План сценарного тестирования: `doc/СценарноеТестирование.md`
 
 ---
 
@@ -85,7 +85,3 @@ MVP-система управления **онбордингом/оффборд�
 - `doc/architecture/decisions.md`
 
 ---
-
-## Как запустить (минимально)
-> Запуск зависит от окружения 1С и выбранного способа прогона тестов (локально/CI).
-См. инструкции в `tests/` и скрипты bootstrap (`*.cmd`, `*.sh`), если они используются в проекте.
